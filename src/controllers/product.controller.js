@@ -93,7 +93,7 @@ export const getProductById = async (req, res) => {
       }
     });
 
-    if (!product || product.deleted_at) {
+    if (!product) {
       return res.status(404).json({ error: 'Producto no encontrado' });
     }
 
