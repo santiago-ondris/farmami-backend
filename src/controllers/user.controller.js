@@ -30,3 +30,28 @@ export const createUser = async (req, res) => {
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
+
+export const getUsers = async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      where: { deleted_at: null },
+      select: { id: true, email: true, role: true }
+    });
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.user.update({
+      where: { id },
+      data: { deleted_at: new Date() }
+    });
+    res.json({ message: 'Usuario desactivado' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
