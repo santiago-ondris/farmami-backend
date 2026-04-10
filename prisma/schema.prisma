@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password_hash String
+  role          String    @default("user") // "admin" | "user"
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  deleted_at    DateTime?
+
+  refresh_tokens RefreshToken[]
+  ingresos       Ingreso[]
+  egresos        Egreso[]
+  audit_logs     AuditLog[]
+  products       Product[]
+}
+
+model RefreshToken {
+  id          String    @id @default(uuid())
+  user_id     String
+  token_hash  String    @unique
+  expires_at  DateTime
+  revoked_at  DateTime?
+  created_at  DateTime  @default(now())
+
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model Product {
+  id           String    @id @default(uuid())
+  nombre       String
+  laboratorio  String
+  created_by   String
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+  deleted_at   DateTime?
+
+  creator  User      @relation(fields: [created_by], references: [id])
+  ingresos Ingreso[]
+  egresos  Egreso[]
+}
+
+model Ingreso {
+  id            String    @id @default(uuid())
+  product_id    String
+  fecha_ingreso DateTime
+  lote          String
+  vencimiento   DateTime
+  proveedor     String
+  cadena_frio   Boolean   @default(false)
+  cantidad      Int
+  observaciones String?
+  created_by    String
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  deleted_at    DateTime?
+
+  product  Product  @relation(fields: [product_id], references: [id])
+  creator  User     @relation(fields: [created_by], references: [id])
+}
+
+model Egreso {
+  id                  String    @id @default(uuid())
+  product_id          String
+  fecha_entrega       DateTime
+  cantidad            Int
+  empresa_solicitante String
+  lote                String
+  vencimiento         DateTime
+  serial              String?
+  orden_compra        String?
+  estado_remito       String    @default("Pendiente") // "Pendiente" | "Entregado" | "Cancelado"
+  created_by          String
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  deleted_at          DateTime?
+
+  product Product @relation(fields: [product_id], references: [id])
+  creator User    @relation(fields: [created_by], references: [id])
+}
+
+model AuditLog {
+  id             String   @id @default(uuid())
+  user_id        String
+  tabla          String   // "ingresos" | "egresos" | "products" | "users"
+  registro_id    String
+  accion         String   // "CREATE" | "UPDATE" | "DELETE"
+  payload_antes  Json?
+  payload_despues Json?
+  ip             String?
+  created_at     DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id])
+}
