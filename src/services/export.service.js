@@ -113,7 +113,7 @@ export const generarExcelIngresos = async (ingresos) => {
       laboratorio: i.product?.laboratorio || '',
       lote: i.lote,
       vencimiento: i.vencimiento ? new Date(i.vencimiento).toLocaleDateString('es-AR') : '',
-      proveedor: i.proveedor,
+      proveedor: i.proveedor_rel?.nombre || i.proveedor || '',
       cadena_frio: i.cadena_frio ? 'Sí' : 'No',
       cantidad: i.cantidad,
       observaciones: i.observaciones || ''

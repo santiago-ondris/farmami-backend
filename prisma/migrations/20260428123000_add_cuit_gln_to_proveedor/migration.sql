@@ -1,0 +1,3 @@
+ALTER TABLE "Proveedor"
+ADD COLUMN "cuit" TEXT,
+ADD COLUMN "gln" TEXT;

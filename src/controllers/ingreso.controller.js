@@ -12,7 +12,9 @@ export const getIngresos = async (req, res) => {
     if (search) {
       where.OR = [
         { lote: { contains: search, mode: 'insensitive' } },
-        { proveedor: { contains: search, mode: 'insensitive' } },
+        { nro_remito: { contains: search, mode: 'insensitive' } },
+        { proveedor_rel: { nombre: { contains: search, mode: 'insensitive' } } },
+        { proveedor_rel: { numero: { contains: search, mode: 'insensitive' } } },
         { product: { nombre: { contains: search, mode: 'insensitive' } } }
       ];
     }
@@ -33,7 +35,7 @@ export const getIngresos = async (req, res) => {
     const [ingresos, total] = await Promise.all([
       prisma.ingreso.findMany({
         where,
-        include: { product: true },
+        include: { product: true, proveedor_rel: true },
         orderBy: { fecha_ingreso: 'desc' },
         skip,
         take
@@ -52,12 +54,17 @@ export const createIngreso = async (req, res) => {
   try {
     const data = ingresoSchema.parse(req.body);
 
-    const product = await prisma.product.findUnique({
-      where: { id: data.product_id }
-    });
+    const [product, proveedor] = await Promise.all([
+      prisma.product.findUnique({ where: { id: data.product_id } }),
+      prisma.proveedor.findUnique({ where: { id: data.proveedor_id } })
+    ]);
 
     if (!product || product.deleted_at) {
       return res.status(404).json({ error: 'Producto no encontrado' });
+    }
+
+    if (!proveedor || proveedor.deleted_at) {
+      return res.status(400).json({ error: 'Proveedor invalido' });
     }
 
     const ingreso = await prisma.ingreso.create({
@@ -65,7 +72,12 @@ export const createIngreso = async (req, res) => {
         ...data,
         fecha_ingreso: new Date(data.fecha_ingreso),
         vencimiento: new Date(data.vencimiento),
+        proveedor: proveedor.nombre,
         created_by: req.user.id
+      },
+      include: {
+        product: true,
+        proveedor_rel: true
       }
     });
 
@@ -94,7 +106,7 @@ export const getIngresoById = async (req, res) => {
     const { id } = req.params;
     const ingreso = await prisma.ingreso.findUnique({
       where: { id },
-      include: { product: true }
+      include: { product: true, proveedor_rel: true }
     });
 
     if (!ingreso || ingreso.deleted_at) return res.status(404).json({ error: 'Ingreso no encontrado' });
@@ -114,13 +126,39 @@ export const updateIngreso = async (req, res) => {
     const ingresoAntes = await prisma.ingreso.findUnique({ where: { id } });
     if (!ingresoAntes || ingresoAntes.deleted_at) return res.status(404).json({ error: 'Ingreso no encontrado' });
 
+    if (data.product_id) {
+      const product = await prisma.product.findUnique({
+        where: { id: data.product_id }
+      });
+
+      if (!product || product.deleted_at) {
+        return res.status(404).json({ error: 'Producto no encontrado' });
+      }
+    }
+
     const updateData = { ...data };
     if (data.fecha_ingreso) updateData.fecha_ingreso = new Date(data.fecha_ingreso);
     if (data.vencimiento) updateData.vencimiento = new Date(data.vencimiento);
 
+    if (data.proveedor_id) {
+      const proveedor = await prisma.proveedor.findUnique({
+        where: { id: data.proveedor_id }
+      });
+
+      if (!proveedor || proveedor.deleted_at) {
+        return res.status(400).json({ error: 'Proveedor invalido' });
+      }
+
+      updateData.proveedor = proveedor.nombre;
+    }
+
     const ingresoDespues = await prisma.ingreso.update({
       where: { id },
-      data: updateData
+      data: updateData,
+      include: {
+        product: true,
+        proveedor_rel: true
+      }
     });
 
     await logAction({

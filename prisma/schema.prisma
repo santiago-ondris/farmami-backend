@@ -21,6 +21,12 @@ model User {
   egresos        Egreso[]
   audit_logs     AuditLog[]
   products       Product[]
+  clientes       Cliente[]
+  proveedores    Proveedor[]
+  evaluaciones_clientes    EvaluacionCliente[]
+  evaluaciones_proveedores EvaluacionProveedor[]
+  rechazos       Rechazo[]
+  remitos        Remito[]
 }
 
 model RefreshToken {
@@ -46,15 +52,19 @@ model Product {
   creator  User      @relation(fields: [created_by], references: [id])
   ingresos Ingreso[]
   egresos  Egreso[]
+  rechazos Rechazo[]
+  remito_items RemitoItem[]
 }
 
 model Ingreso {
   id            String    @id @default(uuid())
   product_id    String
   fecha_ingreso DateTime
+  nro_remito    String?
   lote          String
   vencimiento   DateTime
-  proveedor     String
+  proveedor     String?
+  proveedor_id  String?
   cadena_frio   Boolean   @default(false)
   cantidad      Int
   observaciones String?
@@ -63,8 +73,9 @@ model Ingreso {
   updated_at    DateTime  @updatedAt
   deleted_at    DateTime?
 
-  product  Product  @relation(fields: [product_id], references: [id])
-  creator  User     @relation(fields: [created_by], references: [id])
+  product       Product    @relation(fields: [product_id], references: [id])
+  proveedor_rel Proveedor? @relation("ProveedorIngresos", fields: [proveedor_id], references: [id])
+  creator       User       @relation(fields: [created_by], references: [id])
 }
 
 model Egreso {
@@ -78,13 +89,15 @@ model Egreso {
   serial              String?
   orden_compra        String?
   estado_remito       String    @default("Pendiente") // "Pendiente" | "Entregado" | "Cancelado"
+  remito_item_id      String?
   created_by          String
   created_at          DateTime  @default(now())
   updated_at          DateTime  @updatedAt
   deleted_at          DateTime?
 
-  product Product @relation(fields: [product_id], references: [id])
-  creator User    @relation(fields: [created_by], references: [id])
+  product     Product     @relation(fields: [product_id], references: [id])
+  creator     User        @relation(fields: [created_by], references: [id])
+  remito_item RemitoItem? @relation(fields: [remito_item_id], references: [id])
 }
 
 model AuditLog {
@@ -99,4 +112,157 @@ model AuditLog {
   created_at     DateTime @default(now())
 
   user User @relation(fields: [user_id], references: [id])
+}
+
+model Proveedor {
+  id           String    @id @default(uuid())
+  numero       String    @unique
+  nombre       String
+  direccion    String?
+  cuit         String?
+  gln          String?
+  nombre_contacto String?
+  telefono_contacto String?
+  tipo         String
+  producto_o_servicio String?
+  habilitacion_jurisdiccion_provincial Boolean @default(false)
+  ultima_resolucion_djf                Boolean @default(false)
+  disposicion_habilitacion_anmat       Boolean @default(false)
+  cert_buenas_practicas_transito       Boolean @default(false)
+  resolucion_cambio_direccion_tecnica  Boolean @default(false)
+  registro_productos_anmat             Boolean @default(false)
+  habilitacion_municipal               Boolean @default(false)
+  constancia_afip                      Boolean @default(false)
+  documentacion_completa               Boolean @default(false)
+  observaciones String?
+  created_by   String
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+  deleted_at   DateTime?
+
+  creator      User                  @relation(fields: [created_by], references: [id])
+  ingresos     Ingreso[]             @relation("ProveedorIngresos")
+  evaluaciones EvaluacionProveedor[]
+  rechazos     Rechazo[]
+}
+
+model Cliente {
+  id                    String    @id @default(uuid())
+  establecimiento       String
+  nombre                String
+  direccion             String?
+  localidad             String?
+  direccion_tecnica     String?
+  vigencia_habilitacion DateTime?
+  gln                   String?
+  contacto              String?
+  cuit                  String?
+  created_by            String
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+  deleted_at            DateTime?
+
+  creator      User                @relation(fields: [created_by], references: [id])
+  evaluaciones EvaluacionCliente[]
+  remitos      Remito[]
+}
+
+model EvaluacionCliente {
+  id                               String    @id @default(uuid())
+  cliente_id                       String
+  fecha                            DateTime
+  numero_evaluacion                String
+  habilitacion_direccion_jurisdiccion String
+  habilitacion_sanitaria_rugepresa    String
+  constancia_cuit                     String
+  constancia_ingresos_brutos          String
+  certificado_gln                     String
+  habilitacion_municipal              String
+  puntualidad_pagos                   String
+  frecuencia_compras                  String
+  volumen_compras                     String
+  condicion_financiera_general        String
+  experiencia_personal_compra         String
+  created_by                       String
+  created_at                       DateTime  @default(now())
+  updated_at                       DateTime  @updatedAt
+  deleted_at                       DateTime?
+
+  cliente Cliente @relation(fields: [cliente_id], references: [id])
+  creator User    @relation(fields: [created_by], references: [id])
+}
+
+model EvaluacionProveedor {
+  id                                        String    @id @default(uuid())
+  proveedor_id                              String
+  fecha                                     DateTime
+  numero_evaluacion                         String
+  habilitacion_jurisdiccion_provincial      String
+  ultima_resolucion_djf                     String
+  disposicion_habilitacion_anmat            String
+  cert_buenas_practicas_transito            String
+  resolucion_cambio_direccion_tecnica       String
+  registro_productos_anmat                  String
+  habilitacion_municipal                    String
+  constancia_afip                           String
+  documentacion_completa                    String
+  created_by                                String
+  created_at                                DateTime  @default(now())
+  updated_at                                DateTime  @updatedAt
+  deleted_at                                DateTime?
+
+  proveedor Proveedor @relation(fields: [proveedor_id], references: [id])
+  creator   User      @relation(fields: [created_by], references: [id])
+}
+
+model Rechazo {
+  id              String    @id @default(uuid())
+  fecha           DateTime
+  product_id      String
+  lote            String
+  motivo_rechazo  String
+  cantidad        Int
+  remito          String?
+  proveedor_id    String
+  created_by      String
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  deleted_at      DateTime?
+
+  product   Product   @relation(fields: [product_id], references: [id])
+  proveedor Proveedor @relation(fields: [proveedor_id], references: [id])
+  creator   User      @relation(fields: [created_by], references: [id])
+}
+
+model Remito {
+  id          String    @id @default(uuid())
+  numero      String    @unique
+  fecha       DateTime
+  hora        String
+  cliente_id  String
+  estado      String    @default("Pendiente")
+  created_by  String
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  cliente Cliente      @relation(fields: [cliente_id], references: [id])
+  creator User         @relation(fields: [created_by], references: [id])
+  items   RemitoItem[]
+}
+
+model RemitoItem {
+  id          String    @id @default(uuid())
+  remito_id   String
+  product_id  String
+  descripcion String
+  cantidad    Int
+  lote        String
+  vencimiento DateTime
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  remito  Remito   @relation(fields: [remito_id], references: [id])
+  product Product  @relation(fields: [product_id], references: [id])
+  egresos Egreso[]
 }

@@ -12,7 +12,8 @@ export const exportIngresos = async (req, res) => {
       if (search) {
         where.OR = [
           { lote: { contains: search, mode: 'insensitive' } },
-          { proveedor: { contains: search, mode: 'insensitive' } },
+          { proveedor_rel: { nombre: { contains: search, mode: 'insensitive' } } },
+          { proveedor_rel: { numero: { contains: search, mode: 'insensitive' } } },
           { product: { nombre: { contains: search, mode: 'insensitive' } } }
         ];
       }
@@ -30,7 +31,7 @@ export const exportIngresos = async (req, res) => {
 
     const ingresos = await prisma.ingreso.findMany({
       where,
-      include: { product: true },
+      include: { product: true, proveedor_rel: true },
       orderBy: { fecha_ingreso: 'desc' }
     });
 
