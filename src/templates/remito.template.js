@@ -19,6 +19,7 @@ export function buildRemitoHtml(remito) {
     <tr>
       <td>${escapeHtml(item.cantidad)}</td>
       <td>${escapeHtml(item.product?.nombre || item.descripcion)}</td>
+      <td>${escapeHtml(item.product?.laboratorio || '-')}</td>
       <td>${escapeHtml(item.lote)}</td>
       <td>${escapeHtml(formatDate(item.vencimiento))}</td>
     </tr>
@@ -112,8 +113,11 @@ export function buildRemitoHtml(remito) {
             font-weight: 700;
           }
           td:nth-child(1),
-          td:nth-child(3),
           td:nth-child(4) {
+            text-align: center;
+            white-space: nowrap;
+          }
+          td:nth-child(5) {
             text-align: center;
             white-space: nowrap;
           }
@@ -194,8 +198,9 @@ IVA: RESPONSABLE INSCRIPTO</div>
           <table>
             <thead>
               <tr>
-                <th style="width: 14%;">CANTIDAD</th>
+                <th style="width: 12%;">CANTIDAD</th>
                 <th>PRODUCTO</th>
+                <th style="width: 20%;">LABORATORIO</th>
                 <th style="width: 14%;">LOTE</th>
                 <th style="width: 14%;">VTO.</th>
               </tr>
