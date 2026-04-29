@@ -18,7 +18,7 @@ export function buildRemitoHtml(remito) {
   const rows = remito.items.map((item) => `
     <tr>
       <td>${escapeHtml(item.cantidad)}</td>
-      <td>${escapeHtml(item.descripcion)}</td>
+      <td>${escapeHtml(item.product?.nombre || item.descripcion)}</td>
       <td>${escapeHtml(item.lote)}</td>
       <td>${escapeHtml(formatDate(item.vencimiento))}</td>
     </tr>
@@ -195,7 +195,7 @@ IVA: RESPONSABLE INSCRIPTO</div>
             <thead>
               <tr>
                 <th style="width: 14%;">CANTIDAD</th>
-                <th>DESCRIPCION</th>
+                <th>PRODUCTO</th>
                 <th style="width: 14%;">LOTE</th>
                 <th style="width: 14%;">VTO.</th>
               </tr>
