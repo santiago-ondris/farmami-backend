@@ -1,6 +1,6 @@
-import prisma from '../lib/prisma.js';
-import { logAction } from '../services/auditLog.service.js';
-import { clienteSchema, clienteUpdateSchema } from '../validators/clientes.validator.js';
+import prisma from '../../lib/prisma.js';
+import { logAction } from '../../services/auditLog.service.js';
+import { clienteSchema, clienteUpdateSchema } from '../../validators/clientes/clientes.validator.js';
 
 function normalizeZodError(error) {
   return error?.issues || error?.errors || [{ message: 'Payload invalido' }];

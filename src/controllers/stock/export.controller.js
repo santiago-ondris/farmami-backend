@@ -1,6 +1,7 @@
-import prisma from '../lib/prisma.js';
-import { generarExcelIngresos, generarExcelEgresos, generarExcelStock } from '../services/export.service.js';
-import { calcularStockMasivo } from '../services/stock.service.js';
+import prisma from '../../lib/prisma.js';
+import { generarExcelIngresos, generarExcelEgresos, generarExcelStock } from '../../services/export.service.js';
+import { calcularStockMasivo } from '../../services/stock.service.js';
+import { getDateRangeEnd, getDateRangeStart } from '../../utils/dateOnly.js';
 
 export const exportIngresos = async (req, res) => {
   try {
@@ -24,8 +25,8 @@ export const exportIngresos = async (req, res) => {
 
       if (fecha_desde || fecha_hasta) {
         where.fecha_ingreso = {};
-        if (fecha_desde) where.fecha_ingreso.gte = new Date(fecha_desde);
-        if (fecha_hasta) where.fecha_ingreso.lte = new Date(fecha_hasta);
+        if (fecha_desde) where.fecha_ingreso.gte = getDateRangeStart(fecha_desde);
+        if (fecha_hasta) where.fecha_ingreso.lte = getDateRangeEnd(fecha_hasta);
       }
     }
 

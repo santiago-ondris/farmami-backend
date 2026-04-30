@@ -27,6 +27,7 @@ model User {
   evaluaciones_proveedores EvaluacionProveedor[]
   rechazos       Rechazo[]
   remitos        Remito[]
+  ordenes_compra OrdenCompra[]
 }
 
 model RefreshToken {
@@ -144,6 +145,7 @@ model Proveedor {
   ingresos     Ingreso[]             @relation("ProveedorIngresos")
   evaluaciones EvaluacionProveedor[]
   rechazos     Rechazo[]
+  ordenes_compra OrdenCompra[]
 }
 
 model Cliente {
@@ -265,4 +267,36 @@ model RemitoItem {
   remito  Remito   @relation(fields: [remito_id], references: [id])
   product Product  @relation(fields: [product_id], references: [id])
   egresos Egreso[]
+}
+
+model OrdenCompra {
+  id              String             @id @default(uuid())
+  numero          String             @unique
+  fecha           DateTime
+  proveedor_id    String
+  condicion_pago  String
+  fecha_entrega   DateTime?
+  importe_total   Float              @default(0)
+  created_by      String
+  created_at      DateTime           @default(now())
+  updated_at      DateTime           @updatedAt
+  deleted_at      DateTime?
+
+  proveedor Proveedor         @relation(fields: [proveedor_id], references: [id])
+  creator   User              @relation(fields: [created_by], references: [id])
+  items     OrdenCompraItem[]
+}
+
+model OrdenCompraItem {
+  id                String       @id @default(uuid())
+  orden_compra_id   String
+  numero_item       Int
+  producto          String
+  cantidad_pedida   Int
+  precio_unitario   Float
+  importe           Float
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+
+  orden_compra OrdenCompra @relation(fields: [orden_compra_id], references: [id])
 }

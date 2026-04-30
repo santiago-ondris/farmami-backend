@@ -1,5 +1,5 @@
-import prisma from '../lib/prisma.js';
-import { calcularStockMasivo, calcularStock } from '../services/stock.service.js';
+import prisma from '../../lib/prisma.js';
+import { calcularStockMasivo, calcularStock } from '../../services/stock.service.js';
 
 export const getGlobalStock = async (req, res) => {
   try {

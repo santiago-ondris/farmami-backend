@@ -1,10 +1,7 @@
 import { z } from 'zod';
+import { requiredDate } from '../../utils/zodDate.js';
 
 const remitoEstadoEnum = z.enum(['Pendiente', 'Entregado', 'Cancelado']);
-
-const requiredDate = z.union([z.string(), z.date()]).transform((value) => (
-  value instanceof Date ? value : new Date(value)
-));
 
 export const remitoItemSchema = z.object({
   product_id: z.string().uuid(),

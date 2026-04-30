@@ -1,7 +1,8 @@
 import { getTermopharmaLogoDataUri } from './termopharmaLogo.js';
+import { formatDateDisplay } from '../utils/formatDate.js';
 
 function formatDate(dateValue) {
-  return new Date(dateValue).toLocaleDateString('es-AR');
+  return formatDateDisplay(dateValue);
 }
 
 function escapeHtml(value) {

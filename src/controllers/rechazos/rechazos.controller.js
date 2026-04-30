@@ -1,6 +1,7 @@
-import prisma from '../lib/prisma.js';
-import { logAction } from '../services/auditLog.service.js';
-import { rechazoSchema, rechazoUpdateSchema } from '../validators/rechazos.validator.js';
+import prisma from '../../lib/prisma.js';
+import { logAction } from '../../services/auditLog.service.js';
+import { rechazoSchema, rechazoUpdateSchema } from '../../validators/rechazos/rechazos.validator.js';
+import { getDateRangeEnd, getDateRangeStart } from '../../utils/dateOnly.js';
 
 function normalizeZodError(error) {
   return error?.issues || error?.errors || [{ message: 'Payload invalido' }];
@@ -49,8 +50,8 @@ export const getRechazos = async (req, res) => {
 
     if (fecha_desde || fecha_hasta) {
       where.fecha = {};
-      if (fecha_desde) where.fecha.gte = new Date(fecha_desde);
-      if (fecha_hasta) where.fecha.lte = new Date(fecha_hasta);
+      if (fecha_desde) where.fecha.gte = getDateRangeStart(fecha_desde);
+      if (fecha_hasta) where.fecha.lte = getDateRangeEnd(fecha_hasta);
     }
 
     const take = Number(limit);

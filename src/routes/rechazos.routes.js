@@ -6,7 +6,7 @@ import {
   getRechazoById,
   updateRechazo,
   deleteRechazo
-} from '../controllers/rechazos.controller.js';
+} from '../controllers/rechazos/rechazos.controller.js';
 
 const router = Router();
 

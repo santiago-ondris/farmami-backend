@@ -1,7 +1,8 @@
-import prisma from '../lib/prisma.js';
-import { ingresoSchema, ingresoUpdateSchema } from '../validators/ingreso.validator.js';
-import { logAction } from '../services/auditLog.service.js';
-import { calcularStock } from '../services/stock.service.js';
+import prisma from '../../lib/prisma.js';
+import { ingresoSchema, ingresoUpdateSchema } from '../../validators/stock/ingreso.validator.js';
+import { logAction } from '../../services/auditLog.service.js';
+import { calcularStock } from '../../services/stock.service.js';
+import { getDateRangeEnd, getDateRangeStart, parseDateInput } from '../../utils/dateOnly.js';
 
 export const getIngresos = async (req, res) => {
   try {
@@ -25,8 +26,8 @@ export const getIngresos = async (req, res) => {
 
     if (fecha_desde || fecha_hasta) {
       where.fecha_ingreso = {};
-      if (fecha_desde) where.fecha_ingreso.gte = new Date(fecha_desde);
-      if (fecha_hasta) where.fecha_ingreso.lte = new Date(fecha_hasta);
+      if (fecha_desde) where.fecha_ingreso.gte = getDateRangeStart(fecha_desde);
+      if (fecha_hasta) where.fecha_ingreso.lte = getDateRangeEnd(fecha_hasta);
     }
 
     const skip = (Number(page) - 1) * Number(limit);
@@ -70,8 +71,8 @@ export const createIngreso = async (req, res) => {
     const ingreso = await prisma.ingreso.create({
       data: {
         ...data,
-        fecha_ingreso: new Date(data.fecha_ingreso),
-        vencimiento: new Date(data.vencimiento),
+        fecha_ingreso: parseDateInput(data.fecha_ingreso),
+        vencimiento: parseDateInput(data.vencimiento),
         proveedor: proveedor.nombre,
         created_by: req.user.id
       },
@@ -137,8 +138,8 @@ export const updateIngreso = async (req, res) => {
     }
 
     const updateData = { ...data };
-    if (data.fecha_ingreso) updateData.fecha_ingreso = new Date(data.fecha_ingreso);
-    if (data.vencimiento) updateData.vencimiento = new Date(data.vencimiento);
+    if (data.fecha_ingreso) updateData.fecha_ingreso = parseDateInput(data.fecha_ingreso);
+    if (data.vencimiento) updateData.vencimiento = parseDateInput(data.vencimiento);
 
     if (data.proveedor_id) {
       const proveedor = await prisma.proveedor.findUnique({

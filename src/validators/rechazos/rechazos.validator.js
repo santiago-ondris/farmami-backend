@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { requiredDate } from '../../utils/zodDate.js';
 
 const optionalTrimmedString = z.union([z.string(), z.null()]).optional().transform((value) => {
   if (value === undefined || value === null) {
@@ -8,10 +9,6 @@ const optionalTrimmedString = z.union([z.string(), z.null()]).optional().transfo
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
 });
-
-const requiredDate = z.union([z.string(), z.date()]).transform((value) => (
-  value instanceof Date ? value : new Date(value)
-));
 
 export const rechazoSchema = z.object({
   fecha: requiredDate,

@@ -7,7 +7,7 @@ import {
   updateRemito,
   deleteRemito,
   getRemitoPdf
-} from '../controllers/remitos.controller.js';
+} from '../controllers/remitos/remitos.controller.js';
 
 const router = Router();
 

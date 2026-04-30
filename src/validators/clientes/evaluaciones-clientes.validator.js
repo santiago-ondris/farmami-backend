@@ -1,10 +1,7 @@
 import { z } from 'zod';
+import { requiredDate } from '../../utils/zodDate.js';
 
 const aptitudEnum = z.enum(['APTO', 'NO_APTO']);
-
-const requiredDate = z.union([z.string(), z.date()]).transform((value) => (
-  value instanceof Date ? value : new Date(value)
-));
 
 const evaluacionClienteFieldsSchema = z.object({
   fecha: requiredDate,

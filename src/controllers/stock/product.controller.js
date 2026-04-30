@@ -1,7 +1,7 @@
-import prisma from '../lib/prisma.js';
-import { productSchema, productUpdateSchema } from '../validators/product.validator.js';
-import { logAction } from '../services/auditLog.service.js';
-import { calcularStockMasivo, calcularStock } from '../services/stock.service.js';
+import prisma from '../../lib/prisma.js';
+import { productSchema, productUpdateSchema } from '../../validators/stock/product.validator.js';
+import { logAction } from '../../services/auditLog.service.js';
+import { calcularStockMasivo, calcularStock } from '../../services/stock.service.js';
 
 export const getProducts = async (req, res) => {
   try {

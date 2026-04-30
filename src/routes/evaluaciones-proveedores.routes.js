@@ -6,7 +6,7 @@ import {
   getEvaluacionProveedorById,
   updateEvaluacionProveedor,
   deleteEvaluacionProveedor
-} from '../controllers/evaluaciones-proveedores.controller.js';
+} from '../controllers/proveedores/evaluaciones-proveedores.controller.js';
 
 const router = Router();
 

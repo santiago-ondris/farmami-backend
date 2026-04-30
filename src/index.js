@@ -16,6 +16,7 @@ import proveedoresRoutes from './routes/proveedores.routes.js';
 import evaluacionesProveedoresRoutes from './routes/evaluaciones-proveedores.routes.js';
 import rechazosRoutes from './routes/rechazos.routes.js';
 import remitosRoutes from './routes/remitos.routes.js';
+import ordenesCompraRoutes from './routes/ordenes-compra.routes.js';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.use('/api/proveedores', proveedoresRoutes);
 app.use('/api', evaluacionesProveedoresRoutes);
 app.use('/api/rechazos', rechazosRoutes);
 app.use('/api/remitos', remitosRoutes);
+app.use('/api/ordenes-compra', ordenesCompraRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });

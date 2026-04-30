@@ -1,7 +1,8 @@
-import prisma from '../lib/prisma.js';
-import { egresoSchema, egresoUpdateSchema } from '../validators/egreso.validator.js';
-import { logAction } from '../services/auditLog.service.js';
-import { calcularStock } from '../services/stock.service.js';
+import prisma from '../../lib/prisma.js';
+import { egresoSchema, egresoUpdateSchema } from '../../validators/stock/egreso.validator.js';
+import { logAction } from '../../services/auditLog.service.js';
+import { calcularStock } from '../../services/stock.service.js';
+import { parseDateInput } from '../../utils/dateOnly.js';
 
 export const getEgresos = async (req, res) => {
   try {
@@ -83,11 +84,11 @@ export const createEgreso = async (req, res) => {
         return tx.egreso.create({
           data: {
             product_id: data.product_id,
-            fecha_entrega: new Date(data.fecha_entrega),
+            fecha_entrega: parseDateInput(data.fecha_entrega),
             cantidad: data.cantidad,
             empresa_solicitante: data.empresa_solicitante,
             lote: data.lote,
-            vencimiento: new Date(data.vencimiento),
+            vencimiento: parseDateInput(data.vencimiento),
             serial: data.serial,
             orden_compra: data.orden_compra,
             estado_remito: data.estado_remito,
@@ -158,8 +159,8 @@ export const updateEgreso = async (req, res) => {
     if (!egresoAntes || egresoAntes.deleted_at) return res.status(404).json({ error: 'Egreso no encontrado' });
 
     const updateData = { ...data };
-    if (data.fecha_entrega) updateData.fecha_entrega = new Date(data.fecha_entrega);
-    if (data.vencimiento) updateData.vencimiento = new Date(data.vencimiento);
+    if (data.fecha_entrega) updateData.fecha_entrega = parseDateInput(data.fecha_entrega);
+    if (data.vencimiento) updateData.vencimiento = parseDateInput(data.vencimiento);
 
     const egresoDespues = await prisma.egreso.update({
       where: { id },

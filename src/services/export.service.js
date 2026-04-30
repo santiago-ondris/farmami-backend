@@ -1,4 +1,5 @@
 import ExcelJS from 'exceljs';
+import { formatDateDisplay } from '../utils/formatDate.js';
 
 const PRIMARY_COLOR = 'FF2D3748';
 const HEADER_FONT_COLOR = 'FFFFFFFF';
@@ -108,11 +109,11 @@ export const generarExcelIngresos = async (ingresos) => {
   ingresos.forEach(i => {
     sheet.addRow({
       id: i.id,
-      fecha_ingreso: i.fecha_ingreso ? new Date(i.fecha_ingreso).toLocaleDateString('es-AR') : '',
+      fecha_ingreso: i.fecha_ingreso ? formatDateDisplay(i.fecha_ingreso) : '',
       producto: i.product?.nombre || '',
       laboratorio: i.product?.laboratorio || '',
       lote: i.lote,
-      vencimiento: i.vencimiento ? new Date(i.vencimiento).toLocaleDateString('es-AR') : '',
+      vencimiento: i.vencimiento ? formatDateDisplay(i.vencimiento) : '',
       proveedor: i.proveedor_rel?.nombre || i.proveedor || '',
       cadena_frio: i.cadena_frio ? 'Sí' : 'No',
       cantidad: i.cantidad,
@@ -147,13 +148,13 @@ export const generarExcelEgresos = async (egresos) => {
   egresos.forEach(e => {
     sheet.addRow({
       id: e.id,
-      fecha_entrega: e.fecha_entrega ? new Date(e.fecha_entrega).toLocaleDateString('es-AR') : '',
+      fecha_entrega: e.fecha_entrega ? formatDateDisplay(e.fecha_entrega) : '',
       producto: e.product?.nombre || '',
       laboratorio: e.product?.laboratorio || '',
       cantidad: e.cantidad,
       empresa_solicitante: e.empresa_solicitante,
       lote: e.lote,
-      vencimiento: e.vencimiento ? new Date(e.vencimiento).toLocaleDateString('es-AR') : '',
+      vencimiento: e.vencimiento ? formatDateDisplay(e.vencimiento) : '',
       serial: e.serial || '',
       orden_compra: e.orden_compra || '',
       estado_remito: e.estado_remito

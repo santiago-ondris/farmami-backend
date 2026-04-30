@@ -1,8 +1,9 @@
-import prisma from '../lib/prisma.js';
-import { logAction } from '../services/auditLog.service.js';
-import { calcularStockMasivo } from '../services/stock.service.js';
-import { remitoSchema, remitoUpdateSchema } from '../validators/remitos.validator.js';
-import { buildRemitoHtml } from '../templates/remito.template.js';
+import prisma from '../../lib/prisma.js';
+import { logAction } from '../../services/auditLog.service.js';
+import { calcularStockMasivo } from '../../services/stock.service.js';
+import { remitoSchema, remitoUpdateSchema } from '../../validators/remitos/remitos.validator.js';
+import { buildRemitoHtml } from '../../templates/remito.template.js';
+import { getDateRangeEnd, getDateRangeStart } from '../../utils/dateOnly.js';
 
 let puppeteerModulePromise = null;
 
@@ -151,8 +152,8 @@ export const getRemitos = async (req, res) => {
 
     if (fecha_desde || fecha_hasta) {
       where.fecha = {};
-      if (fecha_desde) where.fecha.gte = new Date(fecha_desde);
-      if (fecha_hasta) where.fecha.lte = new Date(fecha_hasta);
+      if (fecha_desde) where.fecha.gte = getDateRangeStart(fecha_desde);
+      if (fecha_hasta) where.fecha.lte = getDateRangeEnd(fecha_hasta);
     }
 
     const take = Number(limit);

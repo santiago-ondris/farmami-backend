@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getGlobalStock, getProductStock } from '../controllers/stock.controller.js';
+import { getGlobalStock, getProductStock } from '../controllers/stock/stock.controller.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
 
 const router = Router();

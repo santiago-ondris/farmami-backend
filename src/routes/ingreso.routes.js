@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getIngresos, createIngreso, getIngresoById, updateIngreso, deleteIngreso } from '../controllers/ingreso.controller.js';
+import { getIngresos, createIngreso, getIngresoById, updateIngreso, deleteIngreso } from '../controllers/stock/ingreso.controller.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
 
 const router = Router();

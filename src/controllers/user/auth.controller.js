@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
-import prisma from '../lib/prisma.js';
-import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../lib/jwt.js';
-import { loginSchema } from '../validators/auth.validator.js';
+import prisma from '../../lib/prisma.js';
+import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../../lib/jwt.js';
+import { loginSchema } from '../../validators/auth.validator.js';
 
 export const login = async (req, res) => {
   try {

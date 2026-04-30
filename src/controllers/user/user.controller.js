@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
-import prisma from '../lib/prisma.js';
-import { createUserSchema } from '../validators/auth.validator.js';
+import prisma from '../../lib/prisma.js';
+import { createUserSchema } from '../../validators/auth.validator.js';
 
 export const createUser = async (req, res) => {
   try {
