@@ -147,12 +147,11 @@ export const createOrdenCompra = async (req, res) => {
 
     const ordenCompra = await prisma.$transaction(async (tx) => {
       const numero = await generateNextOrdenCompraNumber(tx);
-      const fecha = new Date();
 
       const createdOrdenCompra = await tx.ordenCompra.create({
         data: {
           numero,
-          fecha,
+          fecha: data.fecha,
           proveedor_id: data.proveedor_id,
           condicion_pago: data.condicion_pago.trim(),
           fecha_entrega: data.fecha_entrega ?? null,
@@ -234,6 +233,7 @@ export const updateOrdenCompra = async (req, res) => {
       const updatedOrdenCompra = await tx.ordenCompra.update({
         where: { id },
         data: {
+          fecha: data.fecha,
           proveedor_id: data.proveedor_id,
           condicion_pago: data.condicion_pago.trim(),
           fecha_entrega: data.fecha_entrega ?? null,

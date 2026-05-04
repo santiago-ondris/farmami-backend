@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { optionalDate } from '../../utils/zodDate.js';
+import { optionalDate, requiredDate } from '../../utils/zodDate.js';
 
 export const ordenCompraItemSchema = z.object({
   producto: z.string().trim().min(1, 'El producto es obligatorio'),
@@ -8,6 +8,7 @@ export const ordenCompraItemSchema = z.object({
 });
 
 export const ordenCompraSchema = z.object({
+  fecha: requiredDate,
   proveedor_id: z.string().uuid(),
   condicion_pago: z.string().trim().min(1, 'La condicion de pago es obligatoria'),
   fecha_entrega: optionalDate,

@@ -6,7 +6,10 @@ function formatDate(dateValue) {
 }
 
 function formatMoney(value) {
-  return Number(value || 0).toFixed(2);
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+  }).format(Number(value || 0));
 }
 
 function escapeHtml(value) {
