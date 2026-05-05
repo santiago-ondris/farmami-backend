@@ -2,9 +2,37 @@ import prisma from '../../lib/prisma.js';
 import { logAction } from '../../services/auditLog.service.js';
 import { rechazoSchema, rechazoUpdateSchema } from '../../validators/rechazos/rechazos.validator.js';
 import { getDateRangeEnd, getDateRangeStart } from '../../utils/dateOnly.js';
+import { buildRechazoHtml } from '../../templates/rechazo.template.js';
+
+let puppeteerModulePromise = null;
 
 function normalizeZodError(error) {
   return error?.issues || error?.errors || [{ message: 'Payload invalido' }];
+}
+
+async function getPuppeteer() {
+  if (!puppeteerModulePromise) {
+    puppeteerModulePromise = import('puppeteer');
+  }
+
+  const module = await puppeteerModulePromise;
+  return module.default || module;
+}
+
+async function fetchRechazoOrNull(id) {
+  const rechazo = await prisma.rechazo.findUnique({
+    where: { id },
+    include: {
+      product: true,
+      proveedor: true
+    }
+  });
+
+  if (!rechazo || rechazo.deleted_at) {
+    return null;
+  }
+
+  return rechazo;
 }
 
 async function validateRechazoRelations({ productId, proveedorId }) {
@@ -123,15 +151,8 @@ export const createRechazo = async (req, res) => {
 
 export const getRechazoById = async (req, res) => {
   try {
-    const rechazo = await prisma.rechazo.findUnique({
-      where: { id: req.params.id },
-      include: {
-        product: true,
-        proveedor: true
-      }
-    });
-
-    if (!rechazo || rechazo.deleted_at) {
+    const rechazo = await fetchRechazoOrNull(req.params.id);
+    if (!rechazo) {
       return res.status(404).json({ error: 'Rechazo no encontrado' });
     }
 
@@ -217,6 +238,38 @@ export const deleteRechazo = async (req, res) => {
     res.json({ message: 'Rechazo eliminado correctamente' });
   } catch (error) {
     console.error('[deleteRechazo]', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+export const getRechazoPdf = async (req, res) => {
+  try {
+    const rechazo = await fetchRechazoOrNull(req.params.id);
+    if (!rechazo) {
+      return res.status(404).json({ error: 'Rechazo no encontrado' });
+    }
+
+    const htmlTemplate = buildRechazoHtml(rechazo);
+    const puppeteer = await getPuppeteer();
+    const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+
+    try {
+      const page = await browser.newPage();
+      await page.setContent(htmlTemplate, { waitUntil: 'networkidle0' });
+      const pdf = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        preferCSSPageSize: true
+      });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="rechazo-${rechazo.id}.pdf"`);
+      res.send(pdf);
+    } finally {
+      await browser.close();
+    }
+  } catch (error) {
+    console.error('[getRechazoPdf]', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
