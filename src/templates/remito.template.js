@@ -194,6 +194,7 @@ IVA: RESPONSABLE INSCRIPTO</div>
             <li><strong>Cta:</strong> ${escapeHtml(remito.cliente.establecimiento)}</li>
             <li><strong>Dirección:</strong> ${escapeHtml(remito.cliente.direccion || '-')} - <strong>Localidad:</strong> ${escapeHtml(remito.cliente.localidad || '-')}</li>
             <li><strong>IVA:</strong> Exento <strong>CUIT:</strong> ${escapeHtml(remito.cliente.cuit || '-')}</li>
+            <li><strong>GLN:</strong> ${escapeHtml(remito.cliente.gln || '-')}</li>
           </ul>
 
           <table>
