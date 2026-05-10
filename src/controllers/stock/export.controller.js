@@ -88,7 +88,7 @@ export const exportEgresos = async (req, res) => {
 
 export const exportStock = async (req, res) => {
   try {
-    const { filter, search } = req.query;
+    const { filter, search, stock_status } = req.query;
 
     const where = { deleted_at: null };
 
@@ -131,7 +131,13 @@ export const exportStock = async (req, res) => {
       };
     });
 
-    const buffer = await generarExcelStock(result);
+    const filteredResult = result.filter((product) => {
+      if (stock_status === 'withStock') return product.stock > 0;
+      if (stock_status === 'withoutStock') return product.stock <= 0;
+      return true;
+    });
+
+    const buffer = await generarExcelStock(filteredResult);
 
     const dateStr = new Date().toISOString().split('T')[0];
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

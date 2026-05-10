@@ -128,6 +128,7 @@ model Proveedor {
   producto_o_servicio String?
   habilitacion_jurisdiccion_provincial Boolean @default(false)
   ultima_resolucion_djf                Boolean @default(false)
+  certificado_habilitacion_anmat       Boolean @default(false)
   disposicion_habilitacion_anmat       Boolean @default(false)
   cert_buenas_practicas_transito       Boolean @default(false)
   resolucion_cambio_direccion_tecnica  Boolean @default(false)
@@ -159,6 +160,12 @@ model Cliente {
   gln                   String?
   contacto              String?
   cuit                  String?
+  documentacion_habilitacion_djf          Boolean   @default(false)
+  documentacion_habilitacion_ru_ge_pre_sa Boolean   @default(false)
+  documentacion_cuit                      Boolean   @default(false)
+  documentacion_ingresos_brutos           Boolean   @default(false)
+  documentacion_gln                       Boolean   @default(false)
+  documentacion_habilitacion_municipal    Boolean   @default(false)
   created_by            String
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt

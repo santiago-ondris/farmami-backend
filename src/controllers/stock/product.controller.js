@@ -1,7 +1,7 @@
 import prisma from '../../lib/prisma.js';
 import { productSchema, productUpdateSchema } from '../../validators/stock/product.validator.js';
 import { logAction } from '../../services/auditLog.service.js';
-import { calcularStockMasivo, calcularStock } from '../../services/stock.service.js';
+import { calcularStockMasivo, calcularStock, calcularStockPorLote } from '../../services/stock.service.js';
 
 export const getProducts = async (req, res) => {
   try {
@@ -141,6 +141,40 @@ export const getProductById = async (req, res) => {
     });
   } catch (error) {
     console.error('[getProductById]', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+export const getProductLotes = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const product = await prisma.product.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        nombre: true,
+        laboratorio: true,
+        deleted_at: true
+      }
+    });
+
+    if (!product || product.deleted_at) {
+      return res.status(404).json({ error: 'Producto no encontrado' });
+    }
+
+    const lotes = await calcularStockPorLote(id);
+
+    res.json({
+      product: {
+        id: product.id,
+        nombre: product.nombre,
+        laboratorio: product.laboratorio
+      },
+      lotes
+    });
+  } catch (error) {
+    console.error('[getProductLotes]', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 };

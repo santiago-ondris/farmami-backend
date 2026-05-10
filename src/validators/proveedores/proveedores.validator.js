@@ -30,6 +30,7 @@ export const proveedorSchema = z.object({
   producto_o_servicio: optionalTrimmedString,
   habilitacion_jurisdiccion_provincial: z.boolean().optional().default(false),
   ultima_resolucion_djf: z.boolean().optional().default(false),
+  certificado_habilitacion_anmat: z.boolean().optional().default(false),
   disposicion_habilitacion_anmat: z.boolean().optional().default(false),
   cert_buenas_practicas_transito: z.boolean().optional().default(false),
   resolucion_cambio_direccion_tecnica: z.boolean().optional().default(false),
