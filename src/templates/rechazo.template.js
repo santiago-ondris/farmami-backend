@@ -25,18 +25,12 @@ function formatProviderValue(value) {
 export function buildRechazoHtml(rechazo) {
   const logoDataUri = getTermopharmaLogoDataUri();
   const proveedor = rechazo.proveedor || {};
-  const proveedorFields = [
-    ['Numero', proveedor.numero],
+  const proveedorSummary = [
     ['Nombre', proveedor.nombre],
-    ['Tipo', proveedor.tipo],
-    ['Producto o servicio', proveedor.producto_o_servicio],
-    ['Direccion', proveedor.direccion],
     ['CUIT', proveedor.cuit],
-    ['GLN', proveedor.gln],
-    ['Nombre de contacto', proveedor.nombre_contacto],
-    ['Telefono de contacto', proveedor.telefono_contacto],
-    ['Documentacion completa', proveedor.documentacion_completa ? 'Si' : 'No'],
-    ['Observaciones', proveedor.observaciones]
+    ['Telefono', proveedor.telefono_contacto],
+    ['Direccion', proveedor.direccion],
+    ['GLN', proveedor.gln]
   ];
 
   return `
@@ -141,6 +135,13 @@ export function buildRechazoHtml(rechazo) {
             line-height: 1.45;
             word-break: break-word;
           }
+          .detail-list {
+            margin: 0;
+            padding-left: 18px;
+          }
+          .detail-list li + li {
+            margin-top: 4px;
+          }
           .summary-table {
             width: 100%;
             border-collapse: collapse;
@@ -196,7 +197,13 @@ GLN: 7798459280007</div>
             <div class="detail-grid">
               <div class="detail-card">
                 <span class="detail-label">Proveedor</span>
-                <div class="detail-value">${escapeHtml(proveedor.nombre || '-')}</div>
+                <div class="detail-value">
+                  <ul class="detail-list">
+                    ${proveedorSummary.map(([label, value]) => `
+                      <li><strong>${escapeHtml(label)}:</strong> ${escapeHtml(formatProviderValue(value))}</li>
+                    `).join('')}
+                  </ul>
+                </div>
               </div>
               <div class="detail-card">
                 <span class="detail-label">Remito</span>
@@ -206,18 +213,6 @@ GLN: 7798459280007</div>
                 <span class="detail-label">Fecha</span>
                 <div class="detail-value">${escapeHtml(formatDate(rechazo.fecha))}</div>
               </div>
-            </div>
-          </section>
-
-          <section class="section">
-            <h2 class="section-title">DATOS DEL PROVEEDOR</h2>
-            <div class="detail-grid">
-              ${proveedorFields.map(([label, value]) => `
-                <div class="detail-card${label === 'Observaciones' ? ' full' : ''}">
-                  <span class="detail-label">${escapeHtml(label)}</span>
-                  <div class="detail-value">${escapeHtml(formatProviderValue(value))}</div>
-                </div>
-              `).join('')}
             </div>
           </section>
 
