@@ -12,12 +12,14 @@ const optionalTrimmedString = z.union([z.string(), z.null()]).optional().transfo
 
 export const rechazoSchema = z.object({
   fecha: requiredDate,
-  product_id: z.string().uuid(),
-  lote: z.string().trim().min(1, 'El lote es obligatorio'),
-  motivo_rechazo: z.string().trim().min(1, 'El motivo de rechazo es obligatorio'),
-  cantidad: z.number().int().positive(),
   remito: optionalTrimmedString,
-  proveedor_id: z.string().uuid()
+  proveedor_id: z.string().uuid(),
+  items: z.array(z.object({
+    product_id: z.string().uuid(),
+    lote: z.string().trim().min(1, 'El lote es obligatorio'),
+    motivo_rechazo: z.string().trim().min(1, 'El motivo de rechazo es obligatorio'),
+    cantidad: z.number().int().positive()
+  })).min(1, 'Debe haber al menos un producto')
 });
 
 export const rechazoUpdateSchema = rechazoSchema.partial();

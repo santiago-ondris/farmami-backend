@@ -23,8 +23,12 @@ async function fetchRechazoOrNull(id) {
   const rechazo = await prisma.rechazo.findUnique({
     where: { id },
     include: {
-      product: true,
-      proveedor: true
+      proveedor: true,
+      items: {
+        include: {
+          product: true
+        }
+      }
     }
   });
 
@@ -35,21 +39,27 @@ async function fetchRechazoOrNull(id) {
   return rechazo;
 }
 
-async function validateRechazoRelations({ productId, proveedorId }) {
-  const [product, proveedor] = await Promise.all([
-    productId ? prisma.product.findUnique({ where: { id: productId } }) : Promise.resolve(null),
+async function validateRechazoRelations({ items, proveedorId }) {
+  const [proveedor] = await Promise.all([
     proveedorId ? prisma.proveedor.findUnique({ where: { id: proveedorId } }) : Promise.resolve(null)
   ]);
-
-  if (productId && (!product || product.deleted_at)) {
-    return { error: { status: 404, message: 'Producto no encontrado' } };
-  }
 
   if (proveedorId && (!proveedor || proveedor.deleted_at)) {
     return { error: { status: 404, message: 'Proveedor no encontrado' } };
   }
 
-  return { product, proveedor };
+  if (items && items.length > 0) {
+    const productIds = items.map(i => i.product_id);
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds }, deleted_at: null }
+    });
+    
+    if (products.length !== productIds.length) {
+       return { error: { status: 404, message: 'Uno o más productos no fueron encontrados' } };
+    }
+  }
+
+  return { proveedor };
 }
 
 export const getRechazos = async (req, res) => {
@@ -60,16 +70,24 @@ export const getRechazos = async (req, res) => {
 
     if (search) {
       where.OR = [
-        { lote: { contains: search, mode: 'insensitive' } },
-        { motivo_rechazo: { contains: search, mode: 'insensitive' } },
-        { product: { nombre: { contains: search, mode: 'insensitive' } } },
         { proveedor: { nombre: { contains: search, mode: 'insensitive' } } },
-        { proveedor: { numero: { contains: search, mode: 'insensitive' } } }
+        { proveedor: { numero: { contains: search, mode: 'insensitive' } } },
+        {
+          items: {
+            some: {
+              OR: [
+                { lote: { contains: search, mode: 'insensitive' } },
+                { motivo_rechazo: { contains: search, mode: 'insensitive' } },
+                { product: { nombre: { contains: search, mode: 'insensitive' } } }
+              ]
+            }
+          }
+        }
       ];
     }
 
     if (product_id) {
-      where.product_id = product_id;
+      where.items = { some: { product_id } };
     }
 
     if (proveedor_id) {
@@ -89,8 +107,12 @@ export const getRechazos = async (req, res) => {
       prisma.rechazo.findMany({
         where,
         include: {
-          product: true,
-          proveedor: true
+          proveedor: true,
+          items: {
+            include: {
+              product: true
+            }
+          }
         },
         orderBy: { fecha: 'desc' },
         skip,
@@ -110,7 +132,7 @@ export const createRechazo = async (req, res) => {
   try {
     const data = rechazoSchema.parse(req.body);
     const validation = await validateRechazoRelations({
-      productId: data.product_id,
+      items: data.items,
       proveedorId: data.proveedor_id
     });
 
@@ -120,12 +142,21 @@ export const createRechazo = async (req, res) => {
 
     const rechazo = await prisma.rechazo.create({
       data: {
-        ...data,
-        created_by: req.user.id
+        fecha: data.fecha,
+        remito: data.remito,
+        proveedor_id: data.proveedor_id,
+        created_by: req.user.id,
+        items: {
+          create: data.items
+        }
       },
       include: {
-        product: true,
-        proveedor: true
+        proveedor: true,
+        items: {
+          include: {
+            product: true
+          }
+        }
       }
     });
 
@@ -174,7 +205,7 @@ export const updateRechazo = async (req, res) => {
     }
 
     const validation = await validateRechazoRelations({
-      productId: data.product_id,
+      items: data.items,
       proveedorId: data.proveedor_id
     });
 
@@ -184,10 +215,22 @@ export const updateRechazo = async (req, res) => {
 
     const rechazoDespues = await prisma.rechazo.update({
       where: { id },
-      data,
+      data: {
+        fecha: data.fecha,
+        remito: data.remito,
+        proveedor_id: data.proveedor_id,
+        items: {
+          deleteMany: {},
+          create: data.items
+        }
+      },
       include: {
-        product: true,
-        proveedor: true
+        proveedor: true,
+        items: {
+          include: {
+            product: true
+          }
+        }
       }
     });
 

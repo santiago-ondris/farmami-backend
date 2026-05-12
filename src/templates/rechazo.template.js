@@ -79,6 +79,8 @@ export function buildRechazoHtml(rechazo) {
           }
           .section {
             margin-top: 18px;
+          }
+          .section.no-break {
             break-inside: avoid;
             page-break-inside: avoid;
           }
@@ -167,21 +169,9 @@ GLN: 7798459280007</div>
             </div>
           </section>
 
-          <section class="section">
-            <h2 class="section-title">DATOS DEL RECHAZO</h2>
+          <section class="section no-break">
+            <h2 class="section-title">DATOS GENERALES</h2>
             <div class="detail-grid">
-              <div class="detail-card">
-                <span class="detail-label">Producto</span>
-                <div class="detail-value">${escapeHtml(rechazo.product?.nombre || '-')}</div>
-              </div>
-              <div class="detail-card">
-                <span class="detail-label">Cantidad</span>
-                <div class="detail-value">${escapeHtml(rechazo.cantidad)}</div>
-              </div>
-              <div class="detail-card">
-                <span class="detail-label">Lote</span>
-                <div class="detail-value">${escapeHtml(rechazo.lote)}</div>
-              </div>
               <div class="detail-card">
                 <span class="detail-label">Proveedor</span>
                 <div class="detail-value">${escapeHtml(rechazo.proveedor?.nombre || '-')}</div>
@@ -194,35 +184,31 @@ GLN: 7798459280007</div>
                 <span class="detail-label">Fecha</span>
                 <div class="detail-value">${escapeHtml(formatDate(rechazo.fecha))}</div>
               </div>
-              <div class="detail-card full">
-                <span class="detail-label">Motivo de rechazo</span>
-                <div class="detail-value">${escapeHtml(rechazo.motivo_rechazo)}</div>
-              </div>
             </div>
           </section>
 
           <section class="section">
-            <h2 class="section-title">RESUMEN</h2>
+            <h2 class="section-title">PRODUCTOS RECHAZADOS</h2>
             <table class="summary-table">
               <thead>
                 <tr>
-                  <th style="width: 16%;">Fecha</th>
-                  <th style="width: 14%;">Cantidad</th>
-                  <th style="width: 24%;">Producto</th>
+                  <th style="width: 5%; text-align: center;">#</th>
+                  <th style="width: 32%;">Producto</th>
                   <th style="width: 14%;">Lote</th>
-                  <th style="width: 14%;">Remito</th>
-                  <th style="width: 18%;">Proveedor</th>
+                  <th style="width: 14%;">Cantidad</th>
+                  <th style="width: 35%;">Motivo</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>${escapeHtml(formatDate(rechazo.fecha))}</td>
-                  <td>${escapeHtml(rechazo.cantidad)}</td>
-                  <td>${escapeHtml(rechazo.product?.nombre || '-')}</td>
-                  <td>${escapeHtml(rechazo.lote)}</td>
-                  <td>${escapeHtml(rechazo.remito || '-')}</td>
-                  <td>${escapeHtml(rechazo.proveedor?.nombre || '-')}</td>
-                </tr>
+                ${(rechazo.items || []).map((item, index) => `
+                  <tr>
+                    <td style="text-align: center;">${index + 1}</td>
+                    <td>${escapeHtml(item.product?.nombre || '-')}</td>
+                    <td>${escapeHtml(item.lote)}</td>
+                    <td>${escapeHtml(item.cantidad)}</td>
+                    <td>${escapeHtml(item.motivo_rechazo)}</td>
+                  </tr>
+                `).join('')}
               </tbody>
             </table>
           </section>

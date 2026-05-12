@@ -53,7 +53,7 @@ model Product {
   creator  User      @relation(fields: [created_by], references: [id])
   ingresos Ingreso[]
   egresos  Egreso[]
-  rechazos Rechazo[]
+  rechazo_items RechazoItem[]
   remito_items RemitoItem[]
 }
 
@@ -227,10 +227,6 @@ model EvaluacionProveedor {
 model Rechazo {
   id              String    @id @default(uuid())
   fecha           DateTime
-  product_id      String
-  lote            String
-  motivo_rechazo  String
-  cantidad        Int
   remito          String?
   proveedor_id    String
   created_by      String
@@ -238,9 +234,23 @@ model Rechazo {
   updated_at      DateTime  @updatedAt
   deleted_at      DateTime?
 
-  product   Product   @relation(fields: [product_id], references: [id])
   proveedor Proveedor @relation(fields: [proveedor_id], references: [id])
   creator   User      @relation(fields: [created_by], references: [id])
+  items     RechazoItem[]
+}
+
+model RechazoItem {
+  id              String    @id @default(uuid())
+  rechazo_id      String
+  product_id      String
+  lote            String
+  motivo_rechazo  String
+  cantidad        Int
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  rechazo Rechazo @relation(fields: [rechazo_id], references: [id])
+  product Product @relation(fields: [product_id], references: [id])
 }
 
 model Remito {
