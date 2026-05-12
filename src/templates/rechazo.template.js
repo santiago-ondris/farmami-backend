@@ -14,8 +14,30 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
+function formatProviderValue(value) {
+  if (value === null || value === undefined || value === '') {
+    return '-';
+  }
+
+  return value;
+}
+
 export function buildRechazoHtml(rechazo) {
   const logoDataUri = getTermopharmaLogoDataUri();
+  const proveedor = rechazo.proveedor || {};
+  const proveedorFields = [
+    ['Numero', proveedor.numero],
+    ['Nombre', proveedor.nombre],
+    ['Tipo', proveedor.tipo],
+    ['Producto o servicio', proveedor.producto_o_servicio],
+    ['Direccion', proveedor.direccion],
+    ['CUIT', proveedor.cuit],
+    ['GLN', proveedor.gln],
+    ['Nombre de contacto', proveedor.nombre_contacto],
+    ['Telefono de contacto', proveedor.telefono_contacto],
+    ['Documentacion completa', proveedor.documentacion_completa ? 'Si' : 'No'],
+    ['Observaciones', proveedor.observaciones]
+  ];
 
   return `
     <!doctype html>
@@ -162,7 +184,7 @@ GLN: 7798459280007</div>
               <h1>RECHAZO</h1>
               <div class="meta-list">
                 <div><strong>Fecha:</strong> ${escapeHtml(formatDate(rechazo.fecha))}</div>
-                <div><strong>Proveedor:</strong> ${escapeHtml(rechazo.proveedor?.nombre || '-')}</div>
+                <div><strong>Proveedor:</strong> ${escapeHtml(proveedor.nombre || '-')}</div>
                 <div><strong>Remito:</strong> ${escapeHtml(rechazo.remito || '-')}</div>
                 <div><strong>Registro:</strong> ${escapeHtml(rechazo.id)}</div>
               </div>
@@ -174,7 +196,7 @@ GLN: 7798459280007</div>
             <div class="detail-grid">
               <div class="detail-card">
                 <span class="detail-label">Proveedor</span>
-                <div class="detail-value">${escapeHtml(rechazo.proveedor?.nombre || '-')}</div>
+                <div class="detail-value">${escapeHtml(proveedor.nombre || '-')}</div>
               </div>
               <div class="detail-card">
                 <span class="detail-label">Remito</span>
@@ -184,6 +206,18 @@ GLN: 7798459280007</div>
                 <span class="detail-label">Fecha</span>
                 <div class="detail-value">${escapeHtml(formatDate(rechazo.fecha))}</div>
               </div>
+            </div>
+          </section>
+
+          <section class="section">
+            <h2 class="section-title">DATOS DEL PROVEEDOR</h2>
+            <div class="detail-grid">
+              ${proveedorFields.map(([label, value]) => `
+                <div class="detail-card${label === 'Observaciones' ? ' full' : ''}">
+                  <span class="detail-label">${escapeHtml(label)}</span>
+                  <div class="detail-value">${escapeHtml(formatProviderValue(value))}</div>
+                </div>
+              `).join('')}
             </div>
           </section>
 
